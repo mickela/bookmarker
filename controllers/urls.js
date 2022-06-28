@@ -8,9 +8,15 @@ const request = require('request');
 
 const storageLocation = path.join(__dirname, "../", "db", "data.json");
 
-const getData = () => JSON.parse(fs.readFileSync(storageLocation));
+const getData = () => {
+	let content = JSON.parse(fs.readFileSync(storageLocation));
+	return content.filter(x => x !== null);
+};
 
-const updateData = (content) => fs.writeFileSync(storageLocation, JSON.stringify(content));
+const updateData = (content) => {
+	let data = content.filter(x => x !== null)
+	fs.writeFileSync(storageLocation, JSON.stringify(data));
+};
 
 function isValidUrl(url){
 	try{
@@ -52,14 +58,14 @@ exports.createURL = (req, res) =>{
 				const desc = $('meta[name="description"]').attr('content');
 				const favicon = $('link[rel="icon"]').attr('href') !== undefined ? $('link[rel="icon"]').attr('href') : $('link[rel="shortcut icon"]').attr('href');
 	
-				let imageURL = isValidUrl(favicon) === false ? `${url}${favicon}` : favicon;
+				let imageURL = isValidUrl(favicon) === false ? `${url}/${favicon}` : favicon;
 	
 				let fileContent = getData();
 				
 				let bookmark = { title, desc, url, favicon: imageURL, id: ++fileContent.length };
 	
-				fileContent.push(bookmark);
-	
+				fileContent[fileContent.length] = bookmark;
+
 				updateData(fileContent)
 	
 				res.status(201).json({
